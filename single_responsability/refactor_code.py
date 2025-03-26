@@ -8,7 +8,16 @@ from stripe.error import StripeError
 
 _ = load_dotenv()
 
+"""1. SRP (Single Responsibility Principle):
+- Каждый класс имеет единственную ответственность:
+  * PaymentProcessorProtocol - обработка платежей
+  * Notifier - отправка уведомлений
+  * TransactionLogger - логирование операций
+  * CustomerValidator/PaymentDataValidator - валидация данных
+  * StripePaymentProcessor - реализация Stripe-специфичной логики
+  """
 
+# Обязанности: Проверка данных клиента, таких как имя и контактная информация.
 @dataclass
 class CustomerValidator:
     def validate(self, customer_data):
@@ -20,7 +29,7 @@ class CustomerValidator:
             print("Invalid customer data: missing contact info")
             raise ValueError("Invalid customer data: missing contact info")
 
-
+#Ответственность: Обеспечение достоверности платежных данных, таких как информация о карте или токене.
 @dataclass
 class PaymentDataValidator:
     def validate(self, payment_data):
@@ -61,7 +70,7 @@ class TransactionLogger:
             log_file.write(f"{customer_data['name']} paid {payment_data['amount']}\n")
             log_file.write(f"Payment status: {charge['status']}\n")
 
-
+#Ответственность: Обработка платежей через Stripe API.
 @dataclass
 class StripePaymentProcessor:
     def process_transaction(self, customer_data, payment_data) -> Charge:
