@@ -9,7 +9,16 @@ from stripe.error import StripeError
 
 _ = load_dotenv()
 
+"""
+Реализация принципа разделения интерфейсов (ISP) в платежной системе
 
+Код демонстрирует применение ISP через:
+1. Разделение ответственности на специализированные протоколы
+2. Гибкую композицию функциональности в PaymentService
+3. Избегание "жирных" интерфейсов
+"""
+
+# Базовые модели данных
 class ContactInfo(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
@@ -32,7 +41,7 @@ class PaymentResponse(BaseModel):
     transaction_id: Optional[str] = None
     message: Optional[str] = None
 
-
+# Протоколы разделены по функциональности (ISP)
 class PaymentProcessorProtocol(Protocol):
     """
     Protocol for processing payments, refunds, and recurring payments.
@@ -40,17 +49,19 @@ class PaymentProcessorProtocol(Protocol):
     This protocol defines the interface for payment processors. Implementations
     should provide methods for processing payments, refunds, and setting up recurring payments.
     """
-
+    """Ответственность: Базовые операции с платежами"""
     def process_transaction(
         self, customer_data: CustomerData, payment_data: PaymentData
     ) -> PaymentResponse: ...
 
 
 class RefundPaymentProtocol(Protocol):
+    """Ответственность: Только возвраты средств"""
     def refund_payment(self, transaction_id: str) -> PaymentResponse: ...
 
 
 class RecurringPaymentProtocol(Protocol):
+    """Ответственность: Только подписки и рекуррентные платежи"""
     def setup_recurring_payment(
         self, customer_data: CustomerData, payment_data: PaymentData
     ) -> PaymentResponse: ...
@@ -59,6 +70,7 @@ class RecurringPaymentProtocol(Protocol):
 class StripePaymentProcessor(
     PaymentProcessorProtocol, RefundPaymentProtocol, RecurringPaymentProtocol
 ):
+    """ISP: Реализует только необходимые протоколы"""
     def process_transaction(
         self, customer_data: CustomerData, payment_data: PaymentData
     ) -> PaymentResponse:
@@ -288,6 +300,14 @@ class PaymentDataValidator:
             raise ValueError("Invalid payment data: amount must be positive")
 
 
+
+
+
+     """
+    ISP: Использует разделенные протоколы через опциональные зависимости
+    - Основной процессор обязателен
+    - Рефанды и подписки добавляются при необходимости
+    """
 @dataclass
 class PaymentService:
     payment_processor: PaymentProcessorProtocol
