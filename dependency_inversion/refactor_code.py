@@ -32,7 +32,21 @@ class PaymentResponse(BaseModel):
     transaction_id: Optional[str] = None
     message: Optional[str] = None
 
+"""
+Реализация принципа инверсии зависимостей (DIP) в платежной системе
 
+Код демонстрирует частичное применение DIP через:
+1. Использование абстракций (протоколов) для основных компонентов
+2. Внедрение зависимостей через конструктор
+3. Возможность замены реализаций процессоров и нотификаторов
+
+Ограничения и пути улучшения:
+- Валидаторы и логгер привязаны к конкретным реализациям
+- Отсутствие абстракций для всех зависимостей
+"""
+
+
+# Абстракции для основных компонентов (DIP)
 class PaymentProcessorProtocol(Protocol):
     """
     Protocol for processing payments, refunds, and recurring payments.
@@ -40,6 +54,8 @@ class PaymentProcessorProtocol(Protocol):
     This protocol defines the interface for payment processors. Implementations
     should provide methods for processing payments, refunds, and setting up recurring payments.
     """
+
+    #Абстракция для обработки платежей
 
     def process_transaction(
         self, customer_data: CustomerData, payment_data: PaymentData
@@ -211,6 +227,7 @@ class Notifier(Protocol):
     should provide a method `send_confirmation` that sends a confirmation
     to the customer.
     """
+    """Абстракция для уведомлений"""
 
     def send_confirmation(self, customer_data: CustomerData): ...
 
@@ -290,6 +307,9 @@ class PaymentDataValidator:
 
 @dataclass
 class PaymentService:
+    """DIP: Зависит от протоколов, а не конкретных реализаций
+    Можно использовать любой PaymentProcessorProtocol
+    Любая реализация Notifier"""
     payment_processor: PaymentProcessorProtocol
     notifier: Notifier
     customer_validator: CustomerValidator
