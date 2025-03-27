@@ -36,8 +36,10 @@ class PaymentDataValidator:
         if not payment_data.get("source"):
             print("Invalid payment data")
             raise ValueError("Invalid payment data")
+        
 
 
+#Обязанности: Отправка уведомлений по электронной почте или SMS.
 class Notifier:
     def send_confirmation(self, customer_data):
         if "email" in customer_data["contact_info"]:
@@ -61,7 +63,8 @@ class Notifier:
                 f"send the sms using {sms_gateway}: SMS sent to {phone_number}: Thank you for your payment."
             )
 
-
+#Обязанности: Запись и хранение деталей транзакций в системных журналах.
+#Регистрирует транзакции с помощью
 @dataclass
 class TransactionLogger:
     def log(self, customer_data, payment_data, charge):
@@ -91,6 +94,8 @@ class StripePaymentProcessor:
         return charge
 
 
+#Для координации взаимодействия между всеми компонентами был введен новый класс `PaymentService`:
+#Валидирует данные клиента и платежа.
 @dataclass
 class PaymentService:
     customer_validator = CustomerValidator()
