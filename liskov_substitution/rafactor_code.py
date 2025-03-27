@@ -71,7 +71,7 @@ class Notifier(Protocol):
     should provide a method `send_confirmation` that sends a confirmation
     to the customer.
     """
-
+    
     def send_confirmation(self, customer_data: CustomerData):
         """Send a confirmation notification to the customer.
 
@@ -80,7 +80,7 @@ class Notifier(Protocol):
         """
         ...
 
-
+#LSP-совместимость: Оба класса  EmailNotifier и SMSNotifier реализуют один интерфейс и могут взаимозаменяться.
 class EmailNotifier(Notifier):
     def send_confirmation(self, customer_data: CustomerData):
         from email.mime.text import MIMEText
@@ -137,7 +137,7 @@ class PaymentProcessor(Protocol):
         """
         ...
 
-
+#LSP-совместимость: Любой процессор, реализующий этот метод, будет работать в PaymentService
 @dataclass
 class StripePaymentProcessor(PaymentProcessor):
     def process_transaction(
